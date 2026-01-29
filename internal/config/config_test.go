@@ -163,7 +163,7 @@ func TestGetConfig(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: true,
-			errMsg:  "failed validation, required: connections[].sshConfig.privateKey",
+			errMsg:  "failed validation, required: connections[].sshConfig.privateKey or connections[].sshConfig.useAgent",
 		},
 		{
 			name: "oracle config",
@@ -179,8 +179,71 @@ func TestGetConfig(t *testing.T) {
 					},
 				},
 			},
+			wantErr: false,
+		},
+		{
+			name: "ssh agent",
+			args: args{
+				fp: "ssh_agent.yml",
+			},
+			want: &Config{
+				Connections: []*database.DBConfig{
+					{
+						Alias:  "mysql_with_agent",
+						Driver: "mysql",
+						Proto:  "tcp",
+						User:   "admin",
+						Passwd: "secret",
+						Host:   "192.168.1.1",
+						Port:   3306,
+						DBName: "world",
+						SSHCfg: &database.SSHConfig{
+							Host:     "bastion.example.com",
+							Port:     22,
+							User:     "sshuser",
+							UseAgent: true,
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ssh agent with custom sock",
+			args: args{
+				fp: "ssh_agent_custom_sock.yml",
+			},
+			want: &Config{
+				Connections: []*database.DBConfig{
+					{
+						Alias:  "mysql_with_agent_custom_sock",
+						Driver: "mysql",
+						Proto:  "tcp",
+						User:   "admin",
+						Passwd: "secret",
+						Host:   "192.168.1.1",
+						Port:   3306,
+						DBName: "world",
+						SSHCfg: &database.SSHConfig{
+							Host:      "bastion.example.com",
+							Port:      22,
+							User:      "sshuser",
+							UseAgent:  true,
+							AgentSock: "~/.1password/agent.sock",
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "no ssh auth",
+			args: args{
+				fp: "no_ssh_auth.yml",
+			},
+			want:    nil,
 			wantErr: true,
-			errMsg:  "failed validation, required: connections[].sshConfig.privateKey",
+			errMsg:  "failed validation, required: connections[].sshConfig.privateKey or connections[].sshConfig.useAgent",
 		},
 	}
 	for _, tt := range tests {

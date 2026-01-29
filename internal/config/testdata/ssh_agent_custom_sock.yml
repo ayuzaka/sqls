@@ -1,0 +1,15 @@
+connections:
+  - alias: mysql_with_agent_custom_sock
+    driver: mysql
+    proto: tcp
+    user: admin
+    passwd: secret
+    host: 192.168.1.1
+    port: 3306
+    dbName: world
+    sshConfig:
+      host: bastion.example.com
+      port: 22
+      user: sshuser
+      useAgent: true
+      agentSock: ~/.1password/agent.sock

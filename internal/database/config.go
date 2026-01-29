@@ -3,10 +3,13 @@ package database
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
+	"path/filepath"
 
 	"github.com/sqls-server/sqls/dialect"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 type Proto string
@@ -149,6 +152,8 @@ type SSHConfig struct {
 	User       string `json:"user" yaml:"user"`
 	PassPhrase string `json:"passPhrase" yaml:"passPhrase"`
 	PrivateKey string `json:"privateKey" yaml:"privateKey"`
+	UseAgent   bool   `json:"useAgent" yaml:"useAgent"`
+	AgentSock  string `json:"agentSock" yaml:"agentSock"`
 }
 
 func (s *SSHConfig) Validate() error {
@@ -158,8 +163,8 @@ func (s *SSHConfig) Validate() error {
 	if s.User == "" {
 		return errors.New("required: connections[].sshConfig.user")
 	}
-	if s.PrivateKey == "" {
-		return errors.New("required: connections[].sshConfig.privateKey")
+	if s.PrivateKey == "" && !s.UseAgent {
+		return errors.New("required: connections[].sshConfig.privateKey or connections[].sshConfig.useAgent")
 	}
 	return nil
 }
@@ -169,27 +174,54 @@ func (s *SSHConfig) Endpoint() string {
 }
 
 func (s *SSHConfig) ClientConfig() (*ssh.ClientConfig, error) {
-	buffer, err := os.ReadFile(s.PrivateKey)
-	if err != nil {
-		return nil, fmt.Errorf("cannot read SSH private key file, PrivateKey=%s, %w", s.PrivateKey, err)
+	var authMethods []ssh.AuthMethod
+
+	if s.UseAgent {
+		sockPath := s.AgentSock
+		if sockPath == "" {
+			sockPath = os.Getenv("SSH_AUTH_SOCK")
+		}
+		if len(sockPath) > 0 && sockPath[0] == '~' {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				return nil, fmt.Errorf("cannot expand home dir: %w", err)
+			}
+			sockPath = filepath.Join(home, sockPath[1:])
+		}
+		if sockPath == "" {
+			return nil, errors.New("SSH agent requested but SSH_AUTH_SOCK is not set and no agentSock configured")
+		}
+		conn, err := net.Dial("unix", sockPath)
+		if err != nil {
+			return nil, fmt.Errorf("cannot connect to SSH agent at %s: %w", sockPath, err)
+		}
+		agentClient := agent.NewClient(conn)
+		authMethods = append(authMethods, ssh.PublicKeysCallback(agentClient.Signers))
 	}
 
-	var key ssh.Signer
-	if s.PassPhrase != "" {
-		key, err = ssh.ParsePrivateKeyWithPassphrase(buffer, []byte(s.PassPhrase))
+	if s.PrivateKey != "" {
+		buffer, err := os.ReadFile(s.PrivateKey)
 		if err != nil {
-			return nil, fmt.Errorf("cannot parse SSH private key file with passphrase, PrivateKey=%s, %w", s.PrivateKey, err)
+			return nil, fmt.Errorf("cannot read SSH private key file, PrivateKey=%s, %w", s.PrivateKey, err)
 		}
-	} else {
-		key, err = ssh.ParsePrivateKey(buffer)
-		if err != nil {
-			return nil, fmt.Errorf("cannot parse SSH private key file, PrivateKey=%s, %w", s.PrivateKey, err)
+		var key ssh.Signer
+		if s.PassPhrase != "" {
+			key, err = ssh.ParsePrivateKeyWithPassphrase(buffer, []byte(s.PassPhrase))
+			if err != nil {
+				return nil, fmt.Errorf("cannot parse SSH private key file with passphrase, PrivateKey=%s, %w", s.PrivateKey, err)
+			}
+		} else {
+			key, err = ssh.ParsePrivateKey(buffer)
+			if err != nil {
+				return nil, fmt.Errorf("cannot parse SSH private key file, PrivateKey=%s, %w", s.PrivateKey, err)
+			}
 		}
+		authMethods = append(authMethods, ssh.PublicKeys(key))
 	}
 
 	sshConfig := &ssh.ClientConfig{
 		User:            s.User,
-		Auth:            []ssh.AuthMethod{ssh.PublicKeys(key)},
+		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	return sshConfig, nil

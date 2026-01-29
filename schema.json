@@ -89,6 +89,14 @@
               "passPhrase": {
                 "description": "passPhrase. Optional",
                 "type": "string"
+              },
+              "useAgent": {
+                "description": "Use SSH agent for authentication (e.g. 1Password SSH Agent). Optional",
+                "type": "boolean"
+              },
+              "agentSock": {
+                "description": "Custom SSH agent socket path (e.g. ~/.1password/agent.sock). Defaults to SSH_AUTH_SOCK env var. Optional",
+                "type": "string"
               }
             }
           }
