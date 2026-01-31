@@ -1,6 +1,8 @@
 package database
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -100,6 +102,57 @@ func TestSSHConfigValidate(t *testing.T) {
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
 				}
+			}
+		})
+	}
+}
+
+func TestExpandTildePath(t *testing.T) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name    string
+		path    string
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "tilde with slash expands to home directory",
+			path: "~/.1password/agent.sock",
+			want: filepath.Join(home, ".1password/agent.sock"),
+		},
+		{
+			name: "tilde only expands to home directory",
+			path: "~",
+			want: home,
+		},
+		{
+			name: "absolute path is unchanged",
+			path: "/var/run/agent.sock",
+			want: "/var/run/agent.sock",
+		},
+		{
+			name: "empty path is unchanged",
+			path: "",
+			want: "",
+		},
+		{
+			name: "~user path is returned as-is",
+			path: "~otheruser/.ssh/id_rsa",
+			want: "~otheruser/.ssh/id_rsa",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := expandTildePath(tt.path)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("expandTildePath(%q) error = %v, wantErr %v", tt.path, err, tt.wantErr)
+			}
+			if got != tt.want {
+				t.Errorf("expandTildePath(%q) = %q, want %q", tt.path, got, tt.want)
 			}
 		})
 	}

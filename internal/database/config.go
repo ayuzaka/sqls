@@ -173,6 +173,23 @@ func (s *SSHConfig) Endpoint() string {
 	return fmt.Sprintf("%s:%d", s.Host, s.Port)
 }
 
+func expandTildePath(path string) (string, error) {
+	if len(path) == 0 || path[0] != '~' {
+		return path, nil
+	}
+	if len(path) > 1 && path[1] != '/' {
+		return path, nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("cannot expand home dir: %w", err)
+	}
+	if len(path) == 1 {
+		return home, nil
+	}
+	return filepath.Join(home, path[2:]), nil
+}
+
 func (s *SSHConfig) ClientConfig() (*ssh.ClientConfig, error) {
 	var authMethods []ssh.AuthMethod
 
@@ -181,12 +198,9 @@ func (s *SSHConfig) ClientConfig() (*ssh.ClientConfig, error) {
 		if sockPath == "" {
 			sockPath = os.Getenv("SSH_AUTH_SOCK")
 		}
-		if len(sockPath) > 0 && sockPath[0] == '~' {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return nil, fmt.Errorf("cannot expand home dir: %w", err)
-			}
-			sockPath = filepath.Join(home, sockPath[1:])
+		sockPath, err := expandTildePath(sockPath)
+		if err != nil {
+			return nil, err
 		}
 		if sockPath == "" {
 			return nil, errors.New("SSH agent requested but SSH_AUTH_SOCK is not set and no agentSock configured")
