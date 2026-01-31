@@ -70,6 +70,15 @@ func (d *MySQLViaSSHDialer) Dial(ctx context.Context, addr string) (net.Conn, er
 	return d.client.Dial("tcp", addr)
 }
 
+func replaceNetForSSH(dsn string) (string, error) {
+	cfg, err := mysql.ParseDSN(dsn)
+	if err != nil {
+		return "", fmt.Errorf("cannot parse DSN: %w", err)
+	}
+	cfg.Net = "mysql+tcp"
+	return cfg.FormatDSN(), nil
+}
+
 func openMySQLViaSSH(dsn string, sshCfg *SSHConfig) (*sql.DB, *ssh.Client, error) {
 	sshConfig, err := sshCfg.ClientConfig()
 	if err != nil {
@@ -80,7 +89,11 @@ func openMySQLViaSSH(dsn string, sshCfg *SSHConfig) (*sql.DB, *ssh.Client, error
 		return nil, nil, fmt.Errorf("cannot ssh dial, %w", err)
 	}
 	mysql.RegisterDialContext("mysql+tcp", (&MySQLViaSSHDialer{sshConn}).Dial)
-	conn, err := sql.Open("mysql", dsn)
+	sshDSN, err := replaceNetForSSH(dsn)
+	if err != nil {
+		return nil, nil, err
+	}
+	conn, err := sql.Open("mysql", sshDSN)
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot connect database, %w", err)
 	}
