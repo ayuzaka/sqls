@@ -13,7 +13,7 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/stdlib"
-	"github.com/sqls-server/sqls/dialect"
+	"github.com/ayuzaka/sqls/dialect"
 	"golang.org/x/crypto/ssh"
 )
 

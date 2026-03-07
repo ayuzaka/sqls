@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/sqls-server/sqls/dialect"
+	"github.com/ayuzaka/sqls/dialect"
 	"golang.org/x/crypto/ssh"
 )
 

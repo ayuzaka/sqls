@@ -1,6 +1,6 @@
 # sqls: SQL Language Server
 
-![test](https://github.com/sqls-server/sqls/workflows/test/badge.svg)
+![test](https://github.com/ayuzaka/sqls/workflows/test/badge.svg)
 
 An implementation of the Language Server Protocol for SQL.
 
@@ -66,7 +66,12 @@ If the tables are connected with a foreign key sqls can complete ```JOIN``` stat
 ## Installation
 
 ```shell
-go install github.com/sqls-server/sqls@latest
+go install github.com/ayuzaka/sqls@latest
+```
+
+```shell
+mise use -g go:github.com/ayuzaka/sqls@latest
+mise install
 ```
 
 ## Editor Plugins
@@ -270,8 +275,8 @@ See also.
 ## Contributors
 
 This project exists thanks to all the people who contribute.
-<a href="https://github.com/sqls-server/sqls/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=sqls-server/sqls" />
+<a href="https://github.com/ayuzaka/sqls/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=ayuzaka/sqls" />
 </a>
 
 ## Inspired

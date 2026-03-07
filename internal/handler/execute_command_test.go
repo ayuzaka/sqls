@@ -7,9 +7,9 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/tablewriter/tw"
-	"github.com/sqls-server/sqls/internal/config"
-	"github.com/sqls-server/sqls/internal/database"
-	"github.com/sqls-server/sqls/internal/lsp"
+	"github.com/ayuzaka/sqls/internal/config"
+	"github.com/ayuzaka/sqls/internal/database"
+	"github.com/ayuzaka/sqls/internal/lsp"
 )
 
 func Test_executeQuery(t *testing.T) {

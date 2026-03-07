@@ -1,4 +1,4 @@
-module github.com/sqls-server/sqls
+module github.com/ayuzaka/sqls
 
 go 1.25.0
 

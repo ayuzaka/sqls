@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/sqls-server/sqls/internal/database"
+	"github.com/ayuzaka/sqls/internal/database"
 	"gopkg.in/yaml.v2"
 )
 

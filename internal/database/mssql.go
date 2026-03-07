@@ -11,7 +11,7 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/jfcote87/sshdb"
 	"github.com/jfcote87/sshdb/mssql"
-	"github.com/sqls-server/sqls/dialect"
+	"github.com/ayuzaka/sqls/dialect"
 )
 
 func init() {

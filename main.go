@@ -13,8 +13,8 @@ import (
 	"github.com/sourcegraph/jsonrpc2"
 	"github.com/urfave/cli/v2"
 
-	"github.com/sqls-server/sqls/internal/config"
-	"github.com/sqls-server/sqls/internal/handler"
+	"github.com/ayuzaka/sqls/internal/config"
+	"github.com/ayuzaka/sqls/internal/handler"
 )
 
 const name = "sqls"

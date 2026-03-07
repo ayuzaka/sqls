@@ -7,14 +7,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/sqls-server/sqls/ast"
-	"github.com/sqls-server/sqls/ast/astutil"
-	"github.com/sqls-server/sqls/dialect"
-	"github.com/sqls-server/sqls/internal/database"
-	"github.com/sqls-server/sqls/internal/lsp"
-	"github.com/sqls-server/sqls/parser"
-	"github.com/sqls-server/sqls/parser/parseutil"
-	"github.com/sqls-server/sqls/token"
+	"github.com/ayuzaka/sqls/ast"
+	"github.com/ayuzaka/sqls/ast/astutil"
+	"github.com/ayuzaka/sqls/dialect"
+	"github.com/ayuzaka/sqls/internal/database"
+	"github.com/ayuzaka/sqls/internal/lsp"
+	"github.com/ayuzaka/sqls/parser"
+	"github.com/ayuzaka/sqls/parser/parseutil"
+	"github.com/ayuzaka/sqls/token"
 )
 
 type completionType int

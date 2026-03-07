@@ -3,9 +3,9 @@ package parseutil
 import (
 	"fmt"
 
-	"github.com/sqls-server/sqls/ast"
-	"github.com/sqls-server/sqls/ast/astutil"
-	"github.com/sqls-server/sqls/token"
+	"github.com/ayuzaka/sqls/ast"
+	"github.com/ayuzaka/sqls/ast/astutil"
+	"github.com/ayuzaka/sqls/token"
 )
 
 type TableInfo struct {
